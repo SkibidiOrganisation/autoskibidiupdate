@@ -16,16 +16,22 @@ const AccountManager = require('./scripts/AccountManager');
 const LoginPage = path.join(__dirname, 'pages', 'LoginPage.html');
 const redirectPage = path.join(__dirname, 'pages', 'redirect.html');
 const settingsPage = path.join(__dirname, 'pages', 'settings.html');
+const updateProgressPage = path.join(__dirname, 'pages', 'update-progress.html');
+const updateCheckPage = path.join(__dirname, 'pages', 'update-check.html');  // New HTML file for update check
 
 let tray = null;
 let loggedInUser = null;
 let timerStatus = false;
 let window = null;
 let loginwindow = null;
+let updateWindow = null;  // For the progress window
+let updateCheckWindow = null;  // For the initial update check window
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
-//autoUpdater.autoDownload = false;
+
+// Set autoDownload to false for manual control
+autoUpdater.autoDownload = false;
 
 function showLoginNotification() {
     const notification = new Notification({
@@ -69,6 +75,54 @@ function createWindow(chosePage = LoginPage) {
 
     window.show();
     return window;
+}
+
+function createUpdateProgressWindow() {
+    if (updateWindow && !updateWindow.isDestroyed()) {
+        updateWindow.show();
+        return;
+    }
+
+    updateWindow = new BrowserWindow({
+        width: 400,
+        height: 200,
+        resizable: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+        },
+    });
+
+    updateWindow.loadFile(updateProgressPage);
+
+    updateWindow.on('closed', () => {
+        updateWindow = null;
+    });
+}
+
+function createUpdateCheckWindow() {
+    if (updateCheckWindow && !updateCheckWindow.isDestroyed()) {
+        updateCheckWindow.show();
+        return;
+    }
+
+    updateCheckWindow = new BrowserWindow({
+        width: 400,
+        height: 300,
+        resizable: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+        },
+    });
+
+    updateCheckWindow.loadFile(updateCheckPage);
+
+    updateCheckWindow.on('closed', () => {
+        updateCheckWindow = null;
+    });
 }
 
 async function createTray() {
@@ -178,32 +232,80 @@ ipcMain.on('login-success', async (event, data) => {
     await createTray();
 });
 
-app.whenReady().then(async () => {
+// IPC to send progress to the update window
+ipcMain.on('get-update-progress', (event) => {
+    // If needed, but we'll send via 'update-progress' channel
+});
 
-    console.log("Checking for updates…");
-    autoUpdater.checkForUpdatesAndNotify();
+// New IPC for update check from the check window
+ipcMain.on('check-for-updates', async (event) => {
+    try {
+        const checkResult = await autoUpdater.checkForUpdates();
+        if (checkResult.updateInfo) {
+            event.reply('update-check-result', { available: true, info: checkResult.updateInfo });
+        } else {
+            event.reply('update-check-result', { available: false });
+        }
+    } catch (error) {
+        event.reply('update-check-result', { available: false, error: error.message });
+    }
+});
 
+// New IPC for user decision on update
+ipcMain.on('install-update-now', () => {
+    if (updateCheckWindow && !updateCheckWindow.isDestroyed()) {
+        updateCheckWindow.close();
+    }
+    createUpdateProgressWindow();
+    autoUpdater.downloadUpdate();
+});
+
+ipcMain.on('install-update-later', async () => {
+    if (updateCheckWindow && !updateCheckWindow.isDestroyed()) {
+        updateCheckWindow.close();
+    }
+    // Proceed to normal app flow
+    await proceedToApp();
+});
+
+async function proceedToApp() {
     const autoLoginResult = await AccountManager.tryAutoLogin();
 
     if (autoLoginResult && autoLoginResult.success) {
         loggedInUser = autoLoginResult.account || AccountManager.accountName || 'User';
         console.log('Auto-login succeeded for', loggedInUser);
-        await autoUpdater.checkForUpdatesAndNotify();
     } else {
         loggedInUser = null;
         console.log('No auto-login.');
     }
-    autoUpdater.on("checking-for-update", () => console.log("Checking for update..."));
-    autoUpdater.on("update-available", (info) => console.log("Update available.", info));
-    autoUpdater.on("update-not-available", (info) => console.log("No Recent Updates available.", info));
-    autoUpdater.on('update-downloaded', () => {
-        autoUpdater.quitAndInstall();
-    })
+
     await createTray();
+}
+
+app.whenReady().then(async () => {
+    // Show the update check window on start
+    createUpdateCheckWindow();
+
+    // Auto-updater listeners (moved here, no auto-check)
+    autoUpdater.on("checking-for-update", () => console.log("Checking for update..."));
+
+    autoUpdater.on('download-progress', (progressObj) => {
+        console.log(`Download progress: ${progressObj.percent}%`);
+        if (updateWindow && !updateWindow.isDestroyed()) {
+            updateWindow.webContents.send('update-progress', progressObj);
+        }
+    });
+
+    autoUpdater.on('update-downloaded', (info) => {
+        console.log('Update downloaded', info);
+        if (updateWindow && !updateWindow.isDestroyed()) {
+            updateWindow.webContents.send('update-ready');
+        }
+        // Automatically install and restart
+        autoUpdater.quitAndInstall(true, true);  // silent, restart
+    });
 
     if (process.platform === 'darwin') app.dock.hide();
-
-
 
     app.on('activate', () => {
         if (!window || window.isDestroyed()) {
@@ -215,6 +317,3 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
-
-
-//WIP

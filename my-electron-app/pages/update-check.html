@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self' http://localhost:3000 https://cdn.tailwindcss.com;
+                 style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com;">
+    <title>Update Überprüfen</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<style>
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    .animate-spin-self {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes shake {
+        0% {
+            transform: translateX(0);
+        }
+
+        20% {
+            transform: translateX(-10px);
+        }
+
+        40% {
+            transform: translateX(10px);
+        }
+
+        60% {
+            transform: translateX(-10px);
+        }
+
+        80% {
+            transform: translateX(10px);
+        }
+
+        100% {
+            transform: translateX(0);
+        }
+    }
+</style>
+
+<body class="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-6">
+
+<!-- PAGE LOADER (shown while checking) -->
+<div id="checkingLoader" class="flex flex-col items-center justify-center h-full">
+    <div class="animate-spin mb-4">
+        <i data-lucide="loader" class="w-8 h-8 stroke-gray-800"></i>
+    </div>
+    <p class="text-lg font-medium text-gray-700">Überprüfe auf Updates...</p>
+</div>
+
+<!-- Update Available Section (hidden initially) -->
+<div id="updateAvailable" class="hidden w-full max-w-sm">
+    <div class="flex flex-col gap-6">
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img src="../assets/gd24Logo.jpg" class="h-16" alt="Logo" />
+        </div>
+
+        <!-- Update card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden p-6">
+            <div class="flex flex-col items-center text-center gap-4">
+                <h1 class="text-2xl font-bold">Update Verfügbar</h1>
+                <p id="updateVersion" class="text-sm text-gray-500"></p>
+                <p class="text-sm text-gray-500">Möchtest du das Update jetzt installieren?</p>
+
+                <div class="flex gap-4 w-full">
+                    <button id="installNowBtn" class="flex-1 bg-black text-white rounded-lg py-2">Jetzt Installieren</button>
+                    <button id="installLaterBtn" class="flex-1 bg-gray-200 text-black rounded-lg py-2">Später</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-center gap-1 text-center text-xs text-gray-500">
+            © 2025 Made with ❤️ by
+            <a onclick="require('electron').shell.openExternal('https://godigital24.de')" class="underline cursor-pointer">GoDigital24</a>
+        </div>
+    </div>
+</div>
+
+<!-- No Update Section (hidden initially, shown briefly then auto-close) -->
+<div id="noUpdate" class="hidden flex flex-col items-center justify-center h-full">
+    <i data-lucide="check-circle" class="w-8 h-8 stroke-green-500 mb-4"></i>
+    <p class="text-lg font-medium text-gray-700">App ist auf dem neuesten Stand!</p>
+</div>
+
+<!-- Error Section (hidden initially) -->
+<div id="updateError" class="hidden flex flex-col items-center justify-center h-full">
+    <i data-lucide="alert-triangle" class="w-8 h-8 stroke-red-500 mb-4"></i>
+    <p class="text-lg font-medium text-gray-700">Fehler bei der Update-Überprüfung.</p>
+    <p id="errorDetails" class="text-sm text-red-500 mt-2"></p>
+</div>
+
+<script>
+    const { ipcRenderer } = require('electron');
+    lucide.createIcons();
+
+    // Trigger check on load
+    window.addEventListener('DOMContentLoaded', () => {
+        ipcRenderer.send('check-for-updates');
+    });
+
+    // Handle check result
+    ipcRenderer.on('update-check-result', (event, result) => {
+        document.getElementById('checkingLoader').classList.add('hidden');
+
+        if (result.error) {
+            const errorSection = document.getElementById('updateError');
+            document.getElementById('errorDetails').textContent = result.error;
+            errorSection.classList.remove('hidden');
+            setTimeout(() => ipcRenderer.send('install-update-later'), 3000);  // Auto-proceed after 3s
+            return;
+        }
+
+        if (result.available) {
+            const availableSection = document.getElementById('updateAvailable');
+            document.getElementById('updateVersion').textContent = `Neue Version: ${result.info.version}`;
+            availableSection.classList.remove('hidden');
+
+            document.getElementById('installNowBtn').addEventListener('click', () => {
+                ipcRenderer.send('install-update-now');
+            });
+
+            document.getElementById('installLaterBtn').addEventListener('click', () => {
+                ipcRenderer.send('install-update-later');
+            });
+        } else {
+            const noUpdateSection = document.getElementById('noUpdate');
+            noUpdateSection.classList.remove('hidden');
+            setTimeout(() => ipcRenderer.send('install-update-later'), 2000);  // Auto-close after 2s and proceed
+        }
+    });
+</script>
+</body>
+</html>

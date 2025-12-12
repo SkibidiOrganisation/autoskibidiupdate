@@ -25,6 +25,7 @@ let loginwindow = null;
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
+//autoUpdater.autoDownload = false;
 
 function showLoginNotification() {
     const notification = new Notification({
@@ -103,7 +104,7 @@ async function createTray() {
 
     if (!AccountManager.isLoggedIn) {
         menuTemplate = [
-            { label: 'Tray Einrichten', click: () =>
+            { label: 'Tray Nicht Einrichten', click: () =>
                     window ? window.destroy() : createWindow(LoginPage)},
             { type: 'separator' },
             { label: 'Schließen', click: () => process.exit(0) },

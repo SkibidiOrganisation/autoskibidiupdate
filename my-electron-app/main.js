@@ -104,7 +104,7 @@ async function createTray() {
 
     if (!AccountManager.isLoggedIn) {
         menuTemplate = [
-            { label: 'Tray Nicht Einrichten', click: () =>
+            { label: 'Tray Evtl Einrichten', click: () =>
                     window ? window.destroy() : createWindow(LoginPage)},
             { type: 'separator' },
             { label: 'Schließen', click: () => process.exit(0) },

@@ -1,0 +1,30 @@
+  • electron-builder  version=26.0.12 os=24.3.0
+  • loaded configuration  file=package.json ("build" field)
+  • @electron/rebuild already used by electron-builder, please consider to remove excess dependency from devDependencies
+
+To ensure your native dependencies are always matched electron version, simply add script `"postinstall": "electron-builder install-app-deps" to your `package.json`
+  • executing @electron/rebuild  electronVersion=39.2.6 arch=arm64 buildFromSource=false appDir=./
+  • installing native dependencies  arch=arm64
+  • preparing       moduleName=keytar arch=arm64
+  • finished        moduleName=keytar arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=39.2.6 appOutDir=dist/mac-arm64
+  • default Electron icon is used  reason=application icon is not set
+  • skipped macOS application code signing  reason=cannot find valid "Developer ID Application" identity or custom non-Apple code signing certificate, it could cause some undefined behaviour, e.g. macOS localized description not visible, see https://electron.build/code-signing allIdentities=     0 identities found
+                                                Valid identities only
+     0 valid identities found
+  • building        target=macOS zip arch=arm64 file=dist/menudashboard-1.0.4-arm64-mac.zip
+  • building        target=DMG arch=arm64 file=dist/menudashboard-1.0.4-arm64.dmg
+  • building block map  blockMapFile=dist/menudashboard-1.0.4-arm64.dmg.blockmap
+  • building block map  blockMapFile=dist/menudashboard-1.0.4-arm64-mac.zip.blockmap
+  ⨯ open /Users/godigital24.mitarbeiter/Documents/Entwicklung/gd24-Mitarbeiter-folder/ElectronAppMenuBarDash/my-electron-app/dist/menudashboard-1.0.4-arm64-mac.zip: no such file or directory  
+  ⨯ /Users/godigital24.mitarbeiter/Documents/Entwicklung/gd24-Mitarbeiter-folder/ElectronAppMenuBarDash/my-electron-app/node_modules/app-builder-bin/mac/app-builder_arm64 process failed ERR_ELECTRON_BUILDER_CANNOT_EXECUTE
+Exit code:
+1  failedTask=build stackTrace=Error: /Users/godigital24.mitarbeiter/Documents/Entwicklung/gd24-Mitarbeiter-folder/ElectronAppMenuBarDash/my-electron-app/node_modules/app-builder-bin/mac/app-builder_arm64 process failed ERR_ELECTRON_BUILDER_CANNOT_EXECUTE
+Exit code:
+1
+    at ChildProcess.<anonymous> (/Users/godigital24.mitarbeiter/Documents/Entwicklung/gd24-Mitarbeiter-folder/ElectronAppMenuBarDash/my-electron-app/node_modules/builder-util/src/util.ts:259:14)
+    at Object.onceWrapper (node:events:623:26)
+    at ChildProcess.emit (node:events:508:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:305:5)

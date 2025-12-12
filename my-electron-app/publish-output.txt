@@ -1,0 +1,25 @@
+  • electron-builder  version=26.0.12 os=24.3.0
+  • loaded configuration  file=package.json ("build" field)
+  • @electron/rebuild already used by electron-builder, please consider to remove excess dependency from devDependencies
+
+To ensure your native dependencies are always matched electron version, simply add script `"postinstall": "electron-builder install-app-deps" to your `package.json`
+  • executing @electron/rebuild  electronVersion=39.2.6 arch=arm64 buildFromSource=false appDir=./
+  • installing native dependencies  arch=arm64
+  • preparing       moduleName=keytar arch=arm64
+  • finished        moduleName=keytar arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=39.2.6 appOutDir=dist/mac-arm64
+  • default Electron icon is used  reason=application icon is not set
+  • skipped macOS application code signing  reason=cannot find valid "Developer ID Application" identity or custom non-Apple code signing certificate, it could cause some undefined behaviour, e.g. macOS localized description not visible, see https://electron.build/code-signing allIdentities=     0 identities found
+                                                Valid identities only
+     0 valid identities found
+  • building        target=macOS zip arch=arm64 file=dist/menudashboard-1.0.4-arm64-mac.zip
+  • building        target=DMG arch=arm64 file=dist/menudashboard-1.0.4-arm64.dmg
+  • building block map  blockMapFile=dist/menudashboard-1.0.4-arm64.dmg.blockmap
+  • publishing      publisher=Github (owner: SkibidiOrganisation, project: autoskibidiupdate, version: 1.0.4)
+  • uploading       file=menudashboard-1.0.4-arm64.dmg.blockmap provider=github
+  • uploading       file=menudashboard-1.0.4-arm64.dmg provider=github
+  • creating GitHub release  reason=release doesn't exist tag=v1.0.4 version=1.0.4
+  • building block map  blockMapFile=dist/menudashboard-1.0.4-arm64-mac.zip.blockmap
+  • uploading       file=menudashboard-1.0.4-arm64-mac.zip.blockmap provider=github
+  • uploading       file=menudashboard-1.0.4-arm64-mac.zip provider=github

@@ -1,0 +1,13 @@
+directories:
+  output: dist
+  buildResources: build
+appId: SkibidiSigma-TrayApp
+mac:
+  icon: assets/icon.icns
+defaultArch: arm64
+publish:
+  - provider: github
+    owner: SkibidiOrganisation
+    repo: autoskibidiupdate
+files: []
+electronVersion: 39.2.6

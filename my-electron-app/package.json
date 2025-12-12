@@ -1,0 +1,43 @@
+{
+  "name": "menudashboard",
+  "version": "1.0.1",
+  "description": "Custom Menu Bar Dashboard",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "SkibidiSigma-TrayApp",
+    "mac": {
+      "icon": "assets/icon.icns"
+    },
+    "defaultArch": "arm64",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "SkibidiOrganisation",
+        "repo": "autoskibidiupdate"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^39.2.6",
+    "electron-builder": "^26.0.12",
+    "electron-rebuild": "^3.2.9",
+    "electron-updater": "^6.6.2",
+    "node-gyp": "^12.1.0"
+  },
+  "dependencies": {
+    "@emnapi/runtime": "^1.7.1",
+    "axios": "^1.13.2",
+    "electron-log": "^5.4.3",
+    "js-sha512": "^0.9.0",
+    "keytar": "^7.9.0",
+    "update-electron-app": "^3.1.2"
+  }
+}

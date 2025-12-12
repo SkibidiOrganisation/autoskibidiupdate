@@ -1,0 +1,11 @@
+version: 1.0.0
+files:
+  - url: menudashboard-1.0.0-arm64-mac.zip
+    sha512: KTMjbhZ4XHsdlHPcrX6Fzq5WhzR8BX7511OFZSOtVMnZrhTyYpQfoZ04kJQwNs1n5LV+FVWbL5KFYJt+hV8IjQ==
+    size: 109044566
+  - url: menudashboard-1.0.0-arm64.dmg
+    sha512: pVkMWDSbpjM0scEx6+4xpTwqlBWBIAyBOgZr7KEL8Gi6CkBDmeWHUn3fKbMrokmCnQ8xomD0y+a0xvlg+zhN1g==
+    size: 112717289
+path: menudashboard-1.0.0-arm64-mac.zip
+sha512: KTMjbhZ4XHsdlHPcrX6Fzq5WhzR8BX7511OFZSOtVMnZrhTyYpQfoZ04kJQwNs1n5LV+FVWbL5KFYJt+hV8IjQ==
+releaseDate: '2025-12-12T10:51:49.047Z'

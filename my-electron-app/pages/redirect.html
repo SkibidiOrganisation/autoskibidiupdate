@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect Page</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: sans-serif;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .timer-text {
+            position: absolute;
+            bottom: 20px; /* distance from bottom */
+            width: 100%;
+            text-align: center;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+            pointer-events: none; /* allows clicks to pass through */
+        }
+    </style>
+    <script>
+        let startTime;
+
+        function pad(number) {
+            return number < 10 ? '0' + number : number;
+        }
+
+        function updateTimer() {
+            const now = new Date();
+            const elapsed = Math.floor((now - startTime) / 1000); // seconds
+
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+
+            document.getElementById('timer').textContent =
+                `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        window.onload = function () {
+            window.resizeTo(500, 720);
+            startTime = new Date(); // start counting now
+            setInterval(updateTimer, 1000);
+            updateTimer(); // show immediately
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <img src="../assets/monkeyPointerMemeIddea.jpeg" alt="Pointe Monkey">
+    <div id="timer" class="timer-text">00:00:00</div>
+</div>
+</body>
+</html>

@@ -1,2 +1,15 @@
 /node_modules/
-/ignore
+
+/dist/
+/out/
+/build/
+my-electron-app/dist/
+/ignore/
+
+.DS_Store
+Thumbs.db
+
+*.log
+
+.idea/
+.vscode/

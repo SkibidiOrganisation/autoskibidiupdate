@@ -104,7 +104,7 @@ async function createTray() {
 
     if (!AccountManager.isLoggedIn) {
         menuTemplate = [
-            { label: 'Tray Evtl Einrichten', click: () =>
+            { label: 'Tray Einrichten', click: () =>
                     window ? window.destroy() : createWindow(LoginPage)},
             { type: 'separator' },
             { label: 'Schließen', click: () => process.exit(0) },
@@ -135,7 +135,7 @@ async function createTray() {
                     },
                 },
             { type: 'separator' },
-            { label: 'mitarbeiter-portal2', click: () => shell.openExternal('http://localhost:5173/#/home') },
+            { label: 'mitarbeiter-portal', click: () => shell.openExternal('http://localhost:5173/#/home') },
             { type: 'separator' },
 
             {

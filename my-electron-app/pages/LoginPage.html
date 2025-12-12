@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <!-- Updated CSP to allow Tailwind CSS CDN in Electron -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self' http://localhost:3000 https://cdn.tailwindcss.com;
+                   style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+                   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;">
+    <title>Anmelden</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- js-sha512 -->
+    <script src="https://cdn.jsdelivr.net/npm/js-sha512@0.8.0/build/sha512.min.js"></script>
+</head>
+<body class="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-6">
+
+<div class="w-full max-w-sm md:max-w-3xl">
+    <div class="flex flex-col gap-6">
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img src="assets/gd24Logo.jpg" class="h-16" alt="Logo"/>
+        </div>
+
+        <!-- Login card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="grid p-0 md:grid-cols-2">
+                <div class="p-6 md:p-8">
+                    <div class="flex flex-col gap-6">
+                        <!-- Header -->
+                        <div class="flex flex-col items-center text-center">
+                            <h1 class="text-2xl font-bold">Wilkommen 👋🏻</h1>
+                            <p class="text-sm text-gray-500">Anmelden ins Tray</p>
+                        </div>
+
+                        <!-- Username input -->
+                        <div class="grid gap-2">
+                            <label class="text-sm font-medium">E-Mail</label>
+                            <input id="username" class="border rounded-lg px-3 py-2" type="text"
+                                   placeholder="max.muster@example.de"/>
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="grid gap-2">
+                            <div class="flex items-center">
+                                <label class="text-sm font-medium">Passwort</label>
+                                <a class="ml-auto text-sm underline cursor-pointer">Passwort vergessen?</a>
+                            </div>
+                            <input id="password" class="border rounded-lg px-3 py-2" type="password"/>
+                        </div>
+
+                        <!-- Login button -->
+                        <button id="loginBtn" class="w-full py-2 bg-black text-white rounded-lg">
+                            Anmelden
+                        </button>
+
+                        <!-- Error message -->
+                        <p id="errorMsg" class="text-center text-sm text-red-500 hidden"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-center gap-1 text-center text-xs text-gray-500">
+            © 2025 Made with ❤️ by
+            <a onclick="{shell.openExternal('https://godigital24.de')}" class="underline">GoDigital24</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const {shell} = require('electron');
+    const { ipcRenderer } = require('electron');
+    const { sha512 } = require('js-sha512');
+
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    loginBtn.addEventListener('click', async () => {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!username || !password) {
+            errorMsg.textContent = 'Bitte füllen Sie alle Felder aus.';
+            errorMsg.classList.remove('hidden');
+            return;
+        }
+
+        const hashedPassword = sha512(password);
+
+        console.log('Tried to POST to backend with these credentials:', {
+            mailAddress: username,
+            password: hashedPassword
+        });
+
+        try {
+            const res = await fetch('http://localhost:3000/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    mailAddress: username,
+                    password: hashedPassword
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.access_token) {
+                localStorage.setItem('gd24-team-jwt', data.access_token);
+                ipcRenderer.send('login-success', data);
+                window.close();
+            } else {
+                errorMsg.textContent = data.message || 'Login fehlgeschlagen.';
+                errorMsg.classList.remove('hidden');
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+            errorMsg.textContent = 'Verbindungsfehler. Bitte versuchen Sie es später erneut.';
+            errorMsg.classList.remove('hidden');
+        }
+    });
+</script>
+
+</body>
+</html>

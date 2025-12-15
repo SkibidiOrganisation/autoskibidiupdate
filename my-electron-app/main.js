@@ -227,7 +227,7 @@ async function createTray() {
                     },
                 },
             { type: 'separator' },
-            { label: 'mitarbeiter-portal', click: () => shell.openExternal('http://localhost:5173/#/home') },
+            { label: '2313123123123-portal', click: () => shell.openExternal('http://localhost:5173/#/home') },
             { type: 'separator' },
 
             {

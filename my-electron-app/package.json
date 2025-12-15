@@ -1,6 +1,6 @@
 {
   "name": "menudashboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Custom Menu Bar Dashboard",
   "license": "ISC",
   "author": "",
@@ -14,7 +14,8 @@
   "build": {
     "appId": "SkibidiSigma-TrayApp",
     "mac": {
-      "icon": "assets/icon.icns"
+      "icon": "assets/icon.icns",
+      "identity": "-"
     },
     "defaultArch": "arm64",
     "publish": [

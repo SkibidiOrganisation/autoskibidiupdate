@@ -92,8 +92,8 @@ function createUpdateProgressWindow() {
     }
 
     updateWindow = new BrowserWindow({
-        width: 500,  // Increased size
-        height: 700,  // Increased size
+        width: 500,  // Updated size
+        height: 400,  // Updated size
         resizable: false,
         alwaysOnTop: true,
         webPreferences: {
@@ -263,14 +263,22 @@ ipcMain.on('check-for-updates', async (event) => {
 });
 
 // New IPC for user decision on update
-ipcMain.on('install-update-now', () => {
+ipcMain.on('install-update-now', async () => {
     if (updateCheckWindow && !updateCheckWindow.isDestroyed()) {
         updateCheckWindow.close();
     }
     createUpdateProgressWindow();
-    autoUpdater.downloadUpdate()
-        .then(() => console.log('Download started'))
-        .catch(err => console.error('Download failed:', err));
+    try {
+        // Re-check to ensure state is set (fixes "Please check update first")
+        await autoUpdater.checkForUpdates();
+        await autoUpdater.downloadUpdate();
+        console.log('Download started');
+    } catch (err) {
+        console.error('Download failed:', err);
+        if (updateWindow && !updateWindow.isDestroyed()) {
+            updateWindow.webContents.send('update-error', err.message);
+        }
+    }
 });
 
 ipcMain.on('install-update-later', async () => {

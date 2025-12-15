@@ -9,37 +9,35 @@ const {
     Notification,
 } = require('electron');
 const { autoUpdater } = require('electron-updater');
-const log = require('electron-log')
+const log = require('electron-log');
 const path = require('path');
+const fs = require('fs');  // For temp flag file
+
 const AccountManager = require('./scripts/AccountManager');
 
 const LoginPage = path.join(__dirname, 'pages', 'LoginPage.html');
 const redirectPage = path.join(__dirname, 'pages', 'redirect.html');
 const settingsPage = path.join(__dirname, 'pages', 'settings.html');
 const updateProgressPage = path.join(__dirname, 'pages', 'update-progress.html');
-const updateCheckPage = path.join(__dirname, 'pages', 'update-check.html');  // New HTML file for update check
+const updateCheckPage = path.join(__dirname, 'pages', 'update-check.html');
+const updateSuccessPage = path.join(__dirname, 'pages', 'update-success.html');  // New HTML for success
 
 let tray = null;
 let loggedInUser = null;
 let timerStatus = false;
 let window = null;
 let loginwindow = null;
-let updateWindow = null;  // For the progress window
-let updateCheckWindow = null;  // For the initial update check window
+let updateWindow = null;
+let updateCheckWindow = null;
+let updateSuccessWindow = null;
+
+const justUpdatedFlag = path.join(app.getPath('temp'), 'justUpdated.flag');  // Temp file to detect post-update restart
 
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
 
 // Set autoDownload to false for manual control
 autoUpdater.autoDownload = false;
-
-// Add error handling for updater
-autoUpdater.on('error', (error) => {
-    console.error('Update error:', error);
-    if (updateWindow && !updateWindow.isDestroyed()) {
-        updateWindow.webContents.send('update-error', error.message);
-    }
-});
 
 function showLoginNotification() {
     const notification = new Notification({
@@ -92,8 +90,8 @@ function createUpdateProgressWindow() {
     }
 
     updateWindow = new BrowserWindow({
-        width: 500,  // Updated size
-        height: 400,  // Updated size
+        width: 500,
+        height: 400,
         resizable: false,
         alwaysOnTop: true,
         webPreferences: {
@@ -131,6 +129,38 @@ function createUpdateCheckWindow() {
     updateCheckWindow.on('closed', () => {
         updateCheckWindow = null;
     });
+}
+
+function createUpdateSuccessWindow() {
+    if (updateSuccessWindow && !updateSuccessWindow.isDestroyed()) {
+        updateSuccessWindow.show();
+        return;
+    }
+
+    updateSuccessWindow = new BrowserWindow({
+        width: 500,
+        height: 300,
+        resizable: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+        },
+    });
+
+    updateSuccessWindow.loadFile(updateSuccessPage);
+
+    updateSuccessWindow.on('closed', () => {
+        updateSuccessWindow = null;
+    });
+
+    // Auto-close after 5 seconds and proceed
+    setTimeout(async () => {
+        if (updateSuccessWindow && !updateSuccessWindow.isDestroyed()) {
+            updateSuccessWindow.close();
+        }
+        await proceedToApp();
+    }, 5000);
 }
 
 async function createTray() {
@@ -269,10 +299,12 @@ ipcMain.on('install-update-now', async () => {
     }
     createUpdateProgressWindow();
     try {
-        // Re-check to ensure state is set (fixes "Please check update first")
+        // Re-check to ensure state is set
         await autoUpdater.checkForUpdates();
-        await autoUpdater.downloadUpdate();
-        console.log('Download started');
+        // Simulate min 5s loader (even if download is fast)
+        const minLoaderTime = new Promise(resolve => setTimeout(resolve, 5000));
+        await Promise.all([minLoaderTime, autoUpdater.downloadUpdate()]);
+        console.log('Download complete');
     } catch (err) {
         console.error('Download failed:', err);
         if (updateWindow && !updateWindow.isDestroyed()) {
@@ -304,10 +336,16 @@ async function proceedToApp() {
 }
 
 app.whenReady().then(async () => {
-    // Show the update check window on start
-    createUpdateCheckWindow();
+    // Check if just updated (from flag)
+    if (fs.existsSync(justUpdatedFlag)) {
+        fs.unlinkSync(justUpdatedFlag);  // Clear flag
+        createUpdateSuccessWindow();  // Show success window
+    } else {
+        // Normal flow: Show the update check window on start
+        createUpdateCheckWindow();
+    }
 
-    // Auto-updater listeners (moved here, no auto-check)
+    // Auto-updater listeners
     autoUpdater.on("checking-for-update", () => console.log("Checking for update..."));
 
     autoUpdater.on('download-progress', (progressObj) => {
@@ -321,8 +359,11 @@ app.whenReady().then(async () => {
         console.log('Update downloaded', info);
         if (updateWindow && !updateWindow.isDestroyed()) {
             updateWindow.webContents.send('update-ready');
+            updateWindow.close();  // Close progress window
         }
-        // Automatically install and restart (tray will recreate on relaunch)
+        // Set flag for next launch
+        fs.writeFileSync(justUpdatedFlag, '1');
+        // Restart app
         autoUpdater.quitAndInstall(true, true);  // silent, restart
     });
 

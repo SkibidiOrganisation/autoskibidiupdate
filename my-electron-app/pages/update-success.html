@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self' http://localhost:3000 https://cdn.tailwindcss.com;
+                 style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+                 script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://unpkg.com;">
+    <title>Update Erfolgreich</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<style>
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    .animate-spin-self {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes shake {
+        0% {
+            transform: translateX(0);
+        }
+
+        20% {
+            transform: translateX(-10px);
+        }
+
+        40% {
+            transform: translateX(10px);
+        }
+
+        60% {
+            transform: translateX(-10px);
+        }
+
+        80% {
+            transform: translateX(10px);
+        }
+
+        100% {
+            transform: translateX(0);
+        }
+    }
+</style>
+
+<body class="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-6">
+
+<div class="w-full max-w-sm">
+    <div class="flex flex-col gap-6">
+        <!-- Logo -->
+        <div class="flex justify-center">
+            <img src="../assets/gd24Logo.jpg" class="h-16" alt="Logo" />
+        </div>
+
+        <!-- Success card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden p-6">
+            <div class="flex flex-col items-center text-center gap-4">
+                <i data-lucide="check-circle" class="w-12 h-12 stroke-green-500"></i>
+                <h1 class="text-2xl font-bold">Update Erfolgreich Installiert</h1>
+                <p class="text-sm text-gray-500">Weiterleitung...</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-center gap-1 text-center text-xs text-gray-500">
+            © 2025 Made with ❤️ by
+            <a onclick="require('electron').shell.openExternal('https://godigital24.de')" class="underline cursor-pointer">GoDigital24</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+</body>
+</html>

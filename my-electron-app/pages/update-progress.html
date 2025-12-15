@@ -57,6 +57,12 @@
         document.querySelector('h1').innerText = 'Update bereit! Die App wird neu gestartet...';
         document.getElementById('status').innerText = 'Installation läuft...';
     });
+
+    ipcRenderer.on('update-error', (event, message) => {
+        document.querySelector('h1').innerText = 'Update Fehler';
+        document.getElementById('status').innerText = `Fehler: ${message}`;
+        document.getElementById('progress').style.backgroundColor = '#f44336';  // Red for error
+    });
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 {
   "name": "menudashboard",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "description": "Custom Menu Bar Dashboard",
   "license": "ISC",
   "author": "",
@@ -21,7 +21,8 @@
       {
         "provider": "github",
         "owner": "SkibidiOrganisation",
-        "repo": "autoskibidiupdate"
+        "repo": "autoskibidiupdate",
+        "private": false
       }
     ]
   },

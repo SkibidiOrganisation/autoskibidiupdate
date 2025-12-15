@@ -33,6 +33,14 @@ autoUpdater.logger.transports.file.level = 'info';
 // Set autoDownload to false for manual control
 autoUpdater.autoDownload = false;
 
+// Add error handling for updater
+autoUpdater.on('error', (error) => {
+    console.error('Update error:', error);
+    if (updateWindow && !updateWindow.isDestroyed()) {
+        updateWindow.webContents.send('update-error', error.message);
+    }
+});
+
 function showLoginNotification() {
     const notification = new Notification({
         title: AccountManager.isLoggedIn ? 'Login Erfolgreich ✅' : 'Du bist nun Abgemeldet ❌',
@@ -84,8 +92,8 @@ function createUpdateProgressWindow() {
     }
 
     updateWindow = new BrowserWindow({
-        width: 400,
-        height: 200,
+        width: 500,  // Increased size
+        height: 700,  // Increased size
         resizable: false,
         alwaysOnTop: true,
         webPreferences: {
@@ -108,8 +116,8 @@ function createUpdateCheckWindow() {
     }
 
     updateCheckWindow = new BrowserWindow({
-        width: 400,
-        height: 300,
+        width: 500,
+        height: 700,
         resizable: false,
         alwaysOnTop: true,
         webPreferences: {
@@ -239,14 +247,17 @@ ipcMain.on('get-update-progress', (event) => {
 
 // New IPC for update check from the check window
 ipcMain.on('check-for-updates', async (event) => {
+    console.log('Current app version:', app.getVersion());  // Log current version for debugging
     try {
         const checkResult = await autoUpdater.checkForUpdates();
-        if (checkResult.updateInfo) {
+        console.log('Check result:', checkResult);  // Log full result
+        if (checkResult && checkResult.updateInfo) {
             event.reply('update-check-result', { available: true, info: checkResult.updateInfo });
         } else {
             event.reply('update-check-result', { available: false });
         }
     } catch (error) {
+        console.error('Check error:', error);
         event.reply('update-check-result', { available: false, error: error.message });
     }
 });
@@ -257,7 +268,9 @@ ipcMain.on('install-update-now', () => {
         updateCheckWindow.close();
     }
     createUpdateProgressWindow();
-    autoUpdater.downloadUpdate();
+    autoUpdater.downloadUpdate()
+        .then(() => console.log('Download started'))
+        .catch(err => console.error('Download failed:', err));
 });
 
 ipcMain.on('install-update-later', async () => {
@@ -301,7 +314,7 @@ app.whenReady().then(async () => {
         if (updateWindow && !updateWindow.isDestroyed()) {
             updateWindow.webContents.send('update-ready');
         }
-        // Automatically install and restart
+        // Automatically install and restart (tray will recreate on relaunch)
         autoUpdater.quitAndInstall(true, true);  // silent, restart
     });
 
